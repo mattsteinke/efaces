@@ -1,0 +1,24 @@
+#include <Bounce.h>  // Bounce library makes button change detection easy
+const int channel = 1;
+
+Bounce button1 = Bounce(1, 5);  // 5 = 5 ms debounce time
+
+void setup() {
+  pinMode(1, INPUT_PULLUP); //use internal pullup resistor for buttons
+}
+
+void loop() {
+  button1.update();
+  
+  // Note On messages when button is pressed
+  if (button1.fallingEdge()) {
+    usbMIDI.sendNoteOn(60, 99, channel);  // 60 = C4
+  
+  // Note Off messages when button is released
+  if (button1.risingEdge()) {
+    usbMIDI.sendNoteOff(60, 0, channel);  // 60 = C4
+  }
+
+  while (usbMIDI.read()) {
+  }
+}
