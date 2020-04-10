@@ -1,15 +1,5 @@
 int ledPin = 13; ///LED PIN
 
-void OnNoteOn(byte channel, byte note, byte velocity)
-{
-  digitalWrite(ledPin, HIGH);
-}
-
-void OnNoteOff(byte channel, byte note, byte velocity)
-{
-  digitalWrite(ledPin, LOW);
-}
-
 void setup()
 {
   pinMode(ledPin, OUTPUT);
@@ -25,4 +15,14 @@ void setup()
 void loop()
 {
   usbMIDI.read();
+}
+
+void OnNoteOn(byte channel, byte note, byte velocity)
+{
+  digitalWrite(ledPin, HIGH);
+}
+
+void OnNoteOff(byte channel, byte note, byte velocity)
+{
+  digitalWrite(ledPin, LOW);
 }
