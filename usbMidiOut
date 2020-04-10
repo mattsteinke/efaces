@@ -1,0 +1,18 @@
+const int led = 13;
+const int channel = 1;
+
+void setup() {
+  pinMode(led, OUTPUT);
+}
+
+void loop() {
+    usbMIDI.sendNoteOn(60, 99, channel);  // 60 = C4  
+    digitalWrite(led, HIGH);
+    delay(500);1000 ms = 1 second
+    usbMIDI.sendNoteOff(60, 0, channel);  // 60 = C4 
+    digitalWrite(led, LOW); 
+    delay(500);1000 ms = 1 second
+  // MIDI Controllers should discard incoming MIDI messages.
+  while (usbMIDI.read()) {
+  }
+}
