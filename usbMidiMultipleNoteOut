@@ -1,0 +1,86 @@
+#include <Bounce.h>
+
+#define BUTTON1 2
+#define BUTTON2 3
+#define BUTTON3 4
+
+#define LED 13
+bool flag1 = false;
+bool flag2 = false;
+bool flag3 = false;
+int value1;
+int value2;
+int value3;
+
+// Instantiate a Bounce object with a 5 millisecond debounce time
+Bounce bouncer1 = Bounce( BUTTON1, 5 );
+Bounce bouncer2 = Bounce( BUTTON2, 5 );
+Bounce bouncer3 = Bounce( BUTTON3, 5 );
+
+  void setup() {
+  pinMode(BUTTON1, INPUT_PULLUP);
+  pinMode(BUTTON2, INPUT_PULLUP);
+  pinMode(BUTTON3, INPUT_PULLUP);
+  pinMode(LED, OUTPUT);
+}
+
+void loop() {
+
+  bouncer1.update ( );
+  bouncer2.update ( );
+  bouncer3.update ( );
+
+  value1 = bouncer1.read();
+  value2 = bouncer2.read();
+  value3 = bouncer3.read();
+
+  noteFunction1();
+  noteFunction2();
+  noteFunction3();
+
+}
+
+void noteFunction1() {
+
+  if ( value1 == LOW && flag1 == false ) {
+    flag1 = true;
+    digitalWrite(LED, HIGH );
+    usbMIDI.sendNoteOn(60, 99, 1);
+  }
+  if ( value1 == HIGH && flag1 == true ) {
+    flag1 = false;
+    digitalWrite(LED, LOW );
+    usbMIDI.sendNoteOff(60, 99, 1);
+  }
+
+}
+
+void noteFunction2() {
+
+  if ( value2 == LOW && flag2 == false ) {
+    flag2 = true;
+    digitalWrite(LED, HIGH );
+    usbMIDI.sendNoteOn(62, 99, 1);
+  }
+  if ( value2 == HIGH && flag2 == true ) {
+    flag2 = false;
+    digitalWrite(LED, LOW );
+    usbMIDI.sendNoteOff(62, 99, 1);
+  }
+
+}
+
+void noteFunction3() {
+
+  if ( value3 == LOW && flag3 == false ) {
+    flag3 = true;
+    digitalWrite(LED, HIGH );
+    usbMIDI.sendNoteOn(64, 99, 1);
+  }
+  if ( value3 == HIGH && flag3 == true ) {
+    flag3 = false;
+    digitalWrite(LED, LOW );
+    usbMIDI.sendNoteOff(64, 99, 1);
+  }
+
+}
