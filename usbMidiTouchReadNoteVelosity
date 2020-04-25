@@ -1,0 +1,21 @@
+int touchRead_pin = 0;
+int data;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  data = touchRead(touchRead_pin);
+  //Serial.println(data);
+  delay(100);
+
+  if (data >= 900) {
+    //Serial.println("on");
+    data = map(data, 900, 6000, 0, 127);
+    if (data <= 127) {
+      Serial.println(data);
+      usbMIDI.sendNoteOn(60, data, 1);
+    }
+  }
+}
