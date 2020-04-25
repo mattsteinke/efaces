@@ -1,0 +1,25 @@
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+// twelve servo objects can be created on most boards
+
+int pos = 0;    // variable to store the servo position
+
+void setup() {
+  myservo.attach(2);  // attaches the servo on pin 9 to the servo object
+  usbMIDI.setHandleControlChange(myControlChange); // Call usbMIDI callback function, "myControlChange"
+}
+
+void loop() {
+
+  usbMIDI.read(1); // read and set channel number
+
+  myservo.write(pos);
+
+}
+
+void myControlChange(byte channel, byte control, byte value) // when "myControlChange" is called, flash the led and store the control change numbers into a variable
+{
+  //pos = value;
+  pos = map(value, 0, 127, 0, 180);
+}
