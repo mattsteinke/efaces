@@ -1,0 +1,71 @@
+#include "Wire.h"
+#include <MPU6050_light.h>
+
+int xvMin = -20;
+int xvMax = 20;
+int yvMin = -20;
+int yvMax = 20;
+int zvMin = -90;
+int zvMax = 90;
+const int chan = 1;
+int buttonstate;
+int buttonPin = 0;
+
+MPU6050 mpu(Wire);
+unsigned long timer = 0;
+
+void setup() {
+  pinMode(buttonPin, INPUT_PULLUP);
+  Serial.begin(9600);
+  Wire.begin();
+  mpu.begin();
+  Serial.println(F("Calculating gyro offset, do not move MPU6050"));
+  delay(1000);
+  mpu.calcGyroOffsets();
+  Serial.println("Done!\n");
+}
+
+void loop() {
+  buttonstate = digitalRead(buttonPin);
+  mpu.update();
+  if (buttonstate == LOW) {
+    if ((millis() - timer) > 10) { // print data every 10ms
+      int xval = mpu.getAngleX();
+      xval = map(xval, xvMin, xvMax, 1, 127 );
+      if (xval >= 127) {
+        xval = 127;
+      }
+      if (xval <= 0) {
+        xval = 0;
+      }
+      int yval = mpu.getAngleY();
+      yval = map(yval, yvMin, yvMax, 1, 127 );
+      if (yval >= 127) {
+        yval = 127;
+      }
+      if (yval <= 0) {
+        yval = 0;
+      }
+      int zval = mpu.getAngleZ();
+      zval = map(zval, zvMin, zvMax, 1, 127 );
+      if (zval >= 127) {
+        zval = 127;
+      }
+      if (zval <= 0) {
+        zval = 0;
+      }
+
+      usbMIDI.sendControlChange(20, xval, chan);
+      usbMIDI.sendControlChange(21, yval, chan);
+      usbMIDI.sendControlChange(22, zval, chan);
+
+      Serial.print("X : ");
+      Serial.print(xval);
+      Serial.print("\tY : ");
+      Serial.print(yval);
+      Serial.print("\tZ : ");
+      Serial.println(zval);
+      timer = millis();
+    }
+  }
+}
