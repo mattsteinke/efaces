@@ -1,0 +1,87 @@
+#include <Wire.h>
+#include <VL53L0X.h>
+
+VL53L0X sensor;
+
+const int numReadings = 60; // Define the number of samples to keep track of
+
+int readings[numReadings];      // the readings from the analog input
+int readIndex = 0;              // the index of the current reading
+int total = 0;                  // the running total
+int average = 0;                // the average
+int minVal = 30;        //choose your distance values base on serial monitor
+int maxVal = 500;
+
+const int controlNum = 20;      //control change number 20
+const int chan = 1;                       // midi channel
+
+// Uncomment this line to use long range mode
+//#define LONG_RANGE
+
+// Uncomment ONE of these two lines to get
+#define HIGH_SPEED
+//#define HIGH_ACCURACY
+
+void setup() {
+  // initialize serial communication with computer:
+  Serial.begin(9600);
+  // initialize all the readings to 0:
+  for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+    readings[thisReading] = 0;
+  }
+  Wire.begin();
+
+  sensor.setTimeout(500);
+  if (!sensor.init())
+  {
+    Serial.println("Failed to detect and initialize sensor!");
+    while (1) {}
+  }
+
+#if defined LONG_RANGE
+  // lower the return signal rate limit (default is 0.25 MCPS)
+  sensor.setSignalRateLimit(0.1);
+  // increase laser pulse periods (defaults are 14 and 10 PCLKs)
+  sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodPreRange, 18);
+  sensor.setVcselPulsePeriod(VL53L0X::VcselPeriodFinalRange, 14);
+#endif
+
+#if defined HIGH_SPEED
+  // reduce timing budget to 20 ms (default is about 33 ms)
+  sensor.setMeasurementTimingBudget(20000);
+#elif defined HIGH_ACCURACY
+  // increase timing budget to 200 ms
+  sensor.setMeasurementTimingBudget(200000);
+#endif
+}
+
+void loop() {
+
+  if (sensor.timeoutOccurred()) {
+    Serial.println(" TIMEOUT");
+  }
+  // subtract the last reading:
+  total = total - readings[readIndex];
+  // read from the sensor:
+  readings[readIndex] = sensor.readRangeSingleMillimeters();
+  // add the reading to the total:
+  total = total + readings[readIndex];
+  // advance to the next position in the array:
+  readIndex = readIndex + 1;
+
+  // if we're at the end of the array...
+  if (readIndex >= numReadings) {
+    // ...wrap around to the beginning:
+    readIndex = 0;
+  }
+
+  // calculate the average:
+  average = total / numReadings;
+  // send it to the computer as ASCII digits
+  Serial.println(average); //values before you scale them
+  if (average >= minVal && average <= maxVal) {
+    average = map(average, minVal, maxVal, 0, 127); //swap 0 and 127 to reverse the range
+    usbMIDI.sendControlChange(controlNum, average, chan);
+  }
+  delay(1);        // delay in between reads for stability
+}
